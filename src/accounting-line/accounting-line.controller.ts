@@ -7,64 +7,64 @@ import {
   Delete,
   Query,
   UseInterceptors,
-  UsePipes,
+  Param,
+  ParseIntPipe,
+  ClassSerializerInterceptor,
 } from '@nestjs/common';
-import { NotEmptyBodyPipe } from 'src/accounting-line/pipes/not-empty-body-interceptor';
+import { NotEmptyBodyPipe } from 'src/accounting-line/pipes/not-empty-body-pipe';
 import { NotFoundInterceptor } from 'src/interceptors/not-found-interceptor';
-import { DeleteResult, UpdateResult } from 'typeorm';
+import { DeleteResult } from 'typeorm';
 import { AccountingLineService } from './accounting-line.service';
 import { CreateAccountingLineDto } from './dto/create-accounting-line.dto';
-import { QueryAccountingLineDto } from './dto/query-accounting-line.dto';
 import { QueryDateAccountingLineDto } from './dto/query-date-accounting-line.dto';
 import { UpdateAccountingLineDto } from './dto/update-accounting-line.dto';
 import { AccountingLine } from './entities/accounting-line.entity';
 
+@UseInterceptors()
 @Controller('accounting-lines')
-// Interceptor if queries results from database are null
-@UseInterceptors(NotFoundInterceptor)
+@UseInterceptors(NotFoundInterceptor, ClassSerializerInterceptor)
 export class AccountingLineController {
   constructor(private readonly accountingLineService: AccountingLineService) {}
 
-  @Post('add')
+  @Post()
   create(
     @Body() createAccountingLineDto: CreateAccountingLineDto,
   ): Promise<AccountingLine> {
     return this.accountingLineService.createOne(createAccountingLineDto);
   }
 
-  @Get('find/all')
+  @Get()
   findAll(): Promise<AccountingLine[]> {
     return this.accountingLineService.findAll();
   }
 
-  @Get('find')
+  @Get(':companyId/:accountingNumber')
   findOne(
-    @Query()
-    queryAccountingLine: QueryAccountingLineDto,
+    @Param('companyId', ParseIntPipe) companyId: number,
+    @Param('accountingNumber', ParseIntPipe) accountingNumber: number,
   ): Promise<AccountingLine> {
-    return this.accountingLineService.findOne(queryAccountingLine);
+    return this.accountingLineService.findOne(companyId, accountingNumber);
   }
 
-  @Patch('update')
-  // Pipe to check if the body of the request is not empty
-  @UsePipes(NotEmptyBodyPipe)
-  updateOne(
-    @Query()
-    queryAccountingLine: QueryAccountingLineDto,
-    @Body() updateAccountingLineDto: UpdateAccountingLineDto,
-  ): Promise<UpdateResult> {
+  @Patch(':companyId/:accountingNumber')
+  update(
+    @Param('companyId', ParseIntPipe) companyId: number,
+    @Param('accountingNumber', ParseIntPipe) accountingNumber: number,
+    @Body(NotEmptyBodyPipe) updateAccountingLineDto: UpdateAccountingLineDto,
+  ) {
     return this.accountingLineService.update(
-      queryAccountingLine,
+      companyId,
+      accountingNumber,
       updateAccountingLineDto,
     );
   }
 
-  @Delete('delete')
-  removeOne(
-    @Query()
-    queryAccountingLine: QueryAccountingLineDto,
+  @Delete(':companyId/:accountingNumber')
+  remove(
+    @Param('companyId', ParseIntPipe) companyId: number,
+    @Param('accountingNumber', ParseIntPipe) accountingNumber: number,
   ): Promise<DeleteResult> {
-    return this.accountingLineService.removeOne(queryAccountingLine);
+    return this.accountingLineService.remove(companyId, accountingNumber);
   }
 
   @Get('filter')

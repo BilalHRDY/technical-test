@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, Repository, UpdateResult, Between } from 'typeorm';
 import { CreateAccountingLineDto } from './dto/create-accounting-line.dto';
-import { QueryAccountingLineDto } from './dto/query-accounting-line.dto';
 import { QueryDateAccountingLineDto } from './dto/query-date-accounting-line.dto';
 import { UpdateAccountingLineDto } from './dto/update-accounting-line.dto';
 import { AccountingLine } from './entities/accounting-line.entity';
@@ -29,43 +28,43 @@ export class AccountingLineService {
   }
 
   findOne(
-    queryAccountingLine: QueryAccountingLineDto,
+    accountingNumber: number,
+    companyId: number,
   ): Promise<AccountingLine> {
     return this.accountingLineRepository.findOne({
       where: {
-        companyId: queryAccountingLine.companyId,
-        accountingNumber: queryAccountingLine.accountingNumber,
+        companyId: companyId,
+        accountingNumber: accountingNumber,
       },
     });
   }
 
   update(
-    queryAccountingLine: QueryAccountingLineDto,
+    accountingNumber: number,
+    companyId: number,
     updateAccountingLineDto: Partial<UpdateAccountingLineDto>,
   ): Promise<UpdateResult> {
     return this.accountingLineRepository
       .createQueryBuilder('accountingLine')
       .update<AccountingLine>(AccountingLine, updateAccountingLineDto)
       .where('companyId = :companyId', {
-        companyId: queryAccountingLine.companyId,
+        companyId: companyId,
       })
       .andWhere('accountingNumber = :accountingNumber', {
-        accountingNumber: queryAccountingLine.accountingNumber,
+        accountingNumber: accountingNumber,
       })
       .execute();
   }
 
-  removeOne(
-    queryAccountingLine: QueryAccountingLineDto,
-  ): Promise<DeleteResult> {
+  remove(accountingNumber: number, companyId: number): Promise<DeleteResult> {
     return this.accountingLineRepository
       .createQueryBuilder('accountingLine')
       .delete()
       .where('companyId = :companyId', {
-        companyId: queryAccountingLine.companyId,
+        companyId: companyId,
       })
       .andWhere('accountingNumber = :accountingNumber', {
-        accountingNumber: queryAccountingLine.accountingNumber,
+        accountingNumber: accountingNumber,
       })
       .execute();
   }

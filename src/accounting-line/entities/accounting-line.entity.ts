@@ -1,7 +1,9 @@
+import { Exclude } from 'class-transformer';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('accountingLines')
 export class AccountingLine {
+  @Exclude()
   @PrimaryGeneratedColumn('increment')
   id!: number;
 
